@@ -55,4 +55,7 @@ python3 manage.py migrate
 python3 api_yamdb/manage.py runserver
 ```
 
+### Заполнение базы данных тестовыми данными из csv-файлов в static/data
+python api_yamdb/manage.py import_csv
+
 ### Примеры
