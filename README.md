@@ -103,15 +103,17 @@ http://127.0.0.1:8000/api/v1/titles/
 При добавлении нового произведения требуется указать уже существующие категорию и жанр.
 
 Request samples
+'''
 {
-"name": "string",
-"year": 0,
-"description": "string",
-"genre": [
-"string"
-],
-"category": "string"
+  "name": "string",
+  "year": 0,
+  "description": "string",
+  "genre": [
+     "string"
+  ],
+  "category": "string"
 }
+'''
 
 Response samples
 {
