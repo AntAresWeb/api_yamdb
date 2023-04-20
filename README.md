@@ -59,3 +59,75 @@ python3 api_yamdb/manage.py runserver
 python api_yamdb/manage.py import_csv
 
 ### Примеры
+
+#Получение списка всех произведений
+
+http://127.0.0.1:8000/api/v1/titles/
+
+Получить список всех объектов. Права доступа: Доступно без токена
+
+Response samples
+
+{
+"count": 0,
+"next": "string",
+"previous": "string",
+"results": [
+{
+"id": 0,
+"name": "string",
+"year": 0,
+"rating": 0,
+"description": "string",
+"genre": [
+{
+"name": "string",
+"slug": "string"
+}
+],
+"category": {
+"name": "string",
+"slug": "string"
+}
+}
+]
+}
+
+Добавление произведения
+
+http://127.0.0.1:8000/api/v1/titles/
+
+Добавить новое произведение.
+Права доступа: Администратор.
+Нельзя добавлять произведения, которые еще не вышли (год выпуска не может быть больше текущего).
+При добавлении нового произведения требуется указать уже существующие категорию и жанр.
+
+Request samples
+{
+"name": "string",
+"year": 0,
+"description": "string",
+"genre": [
+"string"
+],
+"category": "string"
+}
+
+Response samples
+{
+"id": 0,
+"name": "string",
+"year": 0,
+"rating": 0,
+"description": "string",
+"genre": [
+{
+"name": "string",
+"slug": "string"
+}
+],
+"category": {
+"name": "string",
+"slug": "string"
+}
+}
