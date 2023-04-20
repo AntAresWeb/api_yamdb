@@ -6,10 +6,12 @@ from .models import RoleUser
 class RoleUserCreationForm(UserCreationForm):
     class Meta:
         model = RoleUser
-        fields = ('username', 'email', 'role', 'bio', 'first_name')
+        fields = ('username', 'email', 'role', 'bio', 'first_name',
+                  'last_name')
 
 
 class RoleUserChangeForm(UserChangeForm):
     class Meta:
         model = RoleUser
-        fields = ('username', 'email', 'role', 'bio', 'first_name')
+        fields = ('username', 'email', 'role', 'bio', 'first_name',
+                  'last_name')
