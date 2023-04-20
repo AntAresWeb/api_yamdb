@@ -11,3 +11,6 @@ class RoleUser(AbstractUser):
                             max_length=1, choices=CHIOCE_ROLE, default='U')
     bio = models.TextField(verbose_name='Биография', blank=True,
                            max_length=250)
+
+    def __str__(self):
+        return self.username

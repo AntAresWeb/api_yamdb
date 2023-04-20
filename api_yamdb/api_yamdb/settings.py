@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'reviews',
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
@@ -89,7 +90,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -119,3 +120,6 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=100),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+#User
+AUTH_USER_MODEL = 'users.RoleUser'
