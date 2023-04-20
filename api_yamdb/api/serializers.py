@@ -1,9 +1,45 @@
 from django.db.models import Avg
+from django.core.files.base import ContentFile
 from rest_framework import serializers
-# from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Comment, Review
+from reviews.models import (Category, Comment, Genre, GenreTitle,
+                            Review, Title, User)
+
+
+class CategorySerialiser(serializers.ModelSerializer):
+    ...
+
+    class Meta:
+        model = Category
+        fields = ('id',)
+        read_only_fields = ('id',)
+
+
+class GenreSerialiser(serializers.ModelSerializer):
+    ...
+
+    class Meta:
+        model = Genre
+
+
+class GenreTitleSerialiser(serializers.ModelSerializer):
+    ...
+
+    class Meta:
+        model = GenreTitle
+
+
+class TitleSerialiser(serializers.ModelSerializer):
+    score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Title
+
+    def get_score(self, obj):
+        rating = obj.reviews.aggregate(Avg('score', default=0))
+        return rating.get('score__avg')
+# return self.reviews.aggregate(avg_score=Avg('score'))['avg_score']
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -33,12 +69,3 @@ class ReviewSerializer(serializers.ModelSerializer):
                 message='Вы уже поcтавили оценку этому произвднию',
             )
         ]
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    score = serializers.SerializerMethodField()
-
-    def get_score(self, obj):
-        rating = obj.reviews.aggregate(Avg('score', default=0))
-        return rating.get('score__avg')
-# return self.reviews.aggregate(avg_score=Avg('score'))['avg_score']

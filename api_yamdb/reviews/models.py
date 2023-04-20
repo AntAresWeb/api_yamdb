@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import UniqueConstraint
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-User = get_user_model()
+from users.models import User
 
 
 class Category(models.Model):
@@ -24,6 +24,10 @@ class Title(models.Model):
         related_name='titles', blank=True, null=True
     )
 
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
 
 class GenreTitle(models.Model):
     title = models.ForeignKey(
@@ -38,9 +42,9 @@ class Review(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
-    score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)],
-    )
+    score = models.IntegerField(default=0,
+                                validators=[MinValueValidator(1),
+                                            MaxValueValidator(10)])
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
 
