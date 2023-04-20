@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'reviews',
-    'users.apps.UsersConfig'
+    'users.apps.UsersConfig', # new
 ]
 
 MIDDLEWARE = [
@@ -121,5 +121,5 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-#User
+#Добавлена модель пользователя
 AUTH_USER_MODEL = 'users.RoleUser'

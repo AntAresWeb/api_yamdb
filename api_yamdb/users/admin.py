@@ -7,6 +7,6 @@ from .models import RoleUser
 # Register your models here.
 @admin.register(RoleUser)
 class RoleUserAdmin(UserAdmin):
-    model = RoleUser
-    list_display = ('username', 'email', 'role', 'bio', 'first_name')
-
+    list_display = ('id', 'username', 'email', 'role', 'bio', 'first_name')
+    search_fields = ('username',)
+    list_editable = ('role',)
