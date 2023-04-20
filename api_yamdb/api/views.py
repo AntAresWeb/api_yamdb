@@ -10,17 +10,23 @@ from .serializers import (CategorySerialiser, CommentSerialiser,
                           ReviewSerialiser, TitleSerialiser)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
+                      mixins.ListModelMixin, viewsets.GenericViewSet):
+    # get post del
     queryset = Category.objects.all()
     serializer_class = CategorySerialiser
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    # get post del
     queryset = Comment.objects.all()
     serializer_class = CommentSerialiser
 
 
 class GenreViewSet(viewsets.ModelViewSet):
+    # get post del
     queryset = Genre.objects.all()
     serializer_class = GenreSerialiser
 
@@ -36,5 +42,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    # get post patch del
     queryset = Title.objects.all()
     serializer_class = TitleSerialiser
