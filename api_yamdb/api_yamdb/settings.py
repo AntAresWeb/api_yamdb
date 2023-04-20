@@ -122,4 +122,4 @@ SIMPLE_JWT = {
 }
 
 #Добавлена модель пользователя
-AUTH_USER_MODEL = 'users.RoleUser'
+AUTH_USER_MODEL = 'users.User'

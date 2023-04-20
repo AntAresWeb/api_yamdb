@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class RoleUser(AbstractUser):
+class User(AbstractUser):
     CHIOCE_ROLE = [
         ('Пользователь', 'User'),
         ('Модератор', 'Moderator'),
