@@ -66,7 +66,7 @@ class IsSuperuserOrReadOnly(permissions.BasePermission):
     правами admin. Даже если изменить пользовательскую роль суперюзера — это не
     лишит его прав администратора."""
 
-    message = ""
+    message = " "
 
     def has_object_permission(self, request, view, obj):
         if (request.method in permissions.SAFE_METHODS
