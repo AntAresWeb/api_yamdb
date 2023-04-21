@@ -7,8 +7,7 @@ from .permissions import IsAuthorModeratorAdminOrReadOnly
 from reviews.models import (Category, Comment, Genre, GenreTitle,
                             Review, Title, User)
 from .serializers import (CategorySerialiser, CommentSerializer,
-                          GenreSerialiser, GenreTitleSerialiser,
-                          ReviewSerializer, TitleSerialiser)
+                          GenreSerialiser, ReviewSerializer, TitleSerialiser)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
