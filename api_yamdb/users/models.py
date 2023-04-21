@@ -22,3 +22,12 @@ class User(AbstractUser):
         verbose_name = 'Роль пользователя'
         verbose_name_plural = 'Роль пользователей'
         ordering = ('-id',)
+
+    @property
+    def is_moderator(self):
+        self.role == 'moderator'
+
+
+    @property
+    def is_admin(self):
+        self.role == 'admin'
