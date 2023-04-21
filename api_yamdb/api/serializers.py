@@ -8,19 +8,19 @@ from reviews.models import (Category, Comment, Genre, GenreTitle,
 
 
 class CategorySerialiser(serializers.ModelSerializer):
-    ...
 
     class Meta:
         model = Category
-        fields = ('id',)
+        fields = ('id', 'name', 'slug')
         read_only_fields = ('id',)
 
 
 class GenreSerialiser(serializers.ModelSerializer):
-    ...
 
     class Meta:
         model = Genre
+        fields = ('id', 'name', 'slug')
+        read_only_fields = ('id',)
 
 
 class GenreTitleSerialiser(serializers.ModelSerializer):
@@ -31,15 +31,16 @@ class GenreTitleSerialiser(serializers.ModelSerializer):
 
 
 class TitleSerialiser(serializers.ModelSerializer):
-    score = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
+        fields = ('id', 'name', 'year', 'rating', 'description')
 
-    def get_score(self, obj):
+    def get_rating(self, obj):
         rating = obj.reviews.aggregate(Avg('score', default=0))
         return rating.get('score__avg')
-# return self.reviews.aggregate(avg_score=Avg('score'))['avg_score']
+        # return self.reviews.aggregate(avg_score=Avg('score'))['avg_score']
 
 
 class CommentSerializer(serializers.ModelSerializer):

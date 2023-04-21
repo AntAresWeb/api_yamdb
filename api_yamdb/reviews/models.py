@@ -1,24 +1,25 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.db.models import UniqueConstraint
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from users.models import User
+User = settings.AUTH_USER_MODEL
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=128)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=50, unique=True)
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=128)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=256)
+    slug = models.SlugField(max_length=50, unique=True)
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=256)
     year = models.IntegerField()
+    description = models.TextField()
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
         related_name='titles', blank=True, null=True
@@ -42,7 +43,7 @@ class Review(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
-    score = models.IntegerField(default=0,
+    score = models.IntegerField(default=1,
                                 validators=[MinValueValidator(1),
                                             MaxValueValidator(10)])
     pub_date = models.DateTimeField(

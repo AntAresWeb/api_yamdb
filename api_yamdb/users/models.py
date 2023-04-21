@@ -4,13 +4,13 @@ from django.db import models
 
 class User(AbstractUser):
     CHIOCE_ROLE = [
-        ('Пользователь', 'User'),
-        ('Модератор', 'Moderator'),
-        ('Администратор', 'Admin'),
+        ('user', 'Пользователь'),
+        ('moderator', 'Модератор'),
+        ('admin', 'Администратор'),
     ]
     REQUIRED_FIELDS = ["email", "password"]
     role = models.CharField(verbose_name='Роль пользователя', max_length=16,
-                            choices=CHIOCE_ROLE, default='Пользователь')
+                            choices=CHIOCE_ROLE, default='user')
     bio = models.TextField(verbose_name='Биография', blank=True)
     confirmation_code = models.CharField(verbose_name='Код подтверждения',
                                          max_length=40, null=True, blank=True)
