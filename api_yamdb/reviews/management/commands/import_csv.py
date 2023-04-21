@@ -63,6 +63,8 @@ class Command(BaseCommand):
                 user = User(id=row['id'],
                             username=row['username'],
                             email=row['email'],
+                            role=row['role'],
+                            bio=row['bio'],
                             first_name=row['first_name'],
                             last_name=row['last_name'])
                 user.save()
@@ -105,7 +107,7 @@ class Command(BaseCommand):
 
         self.stdout.write("Добавлено строк %s" % line_count)
 
-        self.stdout.write('Импорт обзоров')
+        self.stdout.write('Импорт комментариев')
         Comment.objects.all().delete()
         with open(finders.find('data/comments.csv')) as csv_file:
             csv_reader = csv.DictReader(csv_file, delimiter=',')
