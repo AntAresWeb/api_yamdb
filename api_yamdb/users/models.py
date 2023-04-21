@@ -3,10 +3,13 @@ from django.db import models
 
 
 class User(AbstractUser):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
     CHIOCE_ROLE = [
-        ('user', 'Пользователь'),
-        ('moderator', 'Модератор'),
-        ('admin', 'Администратор'),
+        (USER, 'Пользователь'),
+        (MODERATOR, 'Модератор'),
+        (ADMIN, 'Администратор'),
     ]
     REQUIRED_FIELDS = ["email", "password"]
     role = models.CharField(verbose_name='Роль пользователя', max_length=16,
