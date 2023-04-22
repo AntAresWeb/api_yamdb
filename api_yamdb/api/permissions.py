@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from rest_framework import permissions
 
 from reviews.models import User
@@ -16,6 +17,8 @@ class IsAuthorModeratorAdminOrReadOnly(permissions.BasePermission):
                 or request.method in permissions.SAFE_METHODS)
 
 
+=======
+>>>>>>> origin/develop
 # создание прав доступа по ТЗ:
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """Аутентифицированный пользователь (user) — может: читать всё; публиковать
@@ -73,7 +76,13 @@ class IsSuperuserOrReadOnly(permissions.BasePermission):
                 or request.user.is_authenticated):
             return True
         return request.user.is_superuser and (
+<<<<<<< HEAD
                     request.user.role == User.USER
                     or request.user.role == User.ADMIN
                     or request.user.role == User.MODERATOR)
 
+=======
+                request.user.role == User.USER
+                or request.user.role == User.ADMIN
+                or request.user.role == User.MODERATOR)
+>>>>>>> origin/develop

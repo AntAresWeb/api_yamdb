@@ -11,8 +11,8 @@ from .serializers import (CategorySerialiser, CommentSerializer,
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """ViewSet для отзывов."""
     serializer_class = ReviewSerializer
-    # pagination_class = 
     permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
 
     def perform_create(self, serializer):
@@ -25,9 +25,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet для комментариев."""
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
-    # pagination_class = 
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
