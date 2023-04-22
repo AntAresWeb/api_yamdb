@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from api_yamdb.api_yamdb.users.models import User
+from reviews.models import User
 
 
 class IsAuthorModeratorAdminOrReadOnly(permissions.BasePermission):
@@ -73,6 +73,7 @@ class IsSuperuserOrReadOnly(permissions.BasePermission):
                 or request.user.is_authenticated):
             return True
         return request.user.is_superuser and (
-                request.user.role == User.USER
-                or request.user.role == User.ADMIN
-                or request.user.role == User.MODERATOR)
+                    request.user.role == User.USER
+                    or request.user.role == User.ADMIN
+                    or request.user.role == User.MODERATOR)
+
