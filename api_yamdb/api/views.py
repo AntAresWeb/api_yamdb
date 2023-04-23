@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
+from .filters import TitleFilter
 from .permissions import IsAuthorModeratorAdminOrReadOnly
 from reviews.models import (Category,
                             Comment,
@@ -70,7 +72,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     # get post patch del
     queryset = Title.objects.all()
     serializer_class = TitleSerialiser
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthorModeratorAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
 
 
 class SignupViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
