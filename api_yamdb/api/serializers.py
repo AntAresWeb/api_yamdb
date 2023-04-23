@@ -22,19 +22,15 @@ class GenreSerialiser(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class GenreTitleSerialiser(serializers.ModelSerializer):
-    ...
-
-    class Meta:
-        model = GenreTitle
-
-
 class TitleSerialiser(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
+    genre = GenreSerialiser(read_only=True, many=True)
+    category = CategorySerialiser(read_only=True)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description')
+        fields = ('id', 'name', 'year', 'rating', 'description',
+                  'genre', 'category')
 
     def get_rating(self, obj):
         rating = obj.reviews.aggregate(Avg('score', default=0))
@@ -74,3 +70,14 @@ class ReviewSerializer(serializers.ModelSerializer):
                     'Вы уже оставили отзыв на это произведение'
                 )
         return data
+
+
+class UserSignupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'username')
+
+    extra_kwargs = {
+        'email': {'required': True, 'allow_blank': False},
+        'username': {'required': True, 'allow_blank': False},
+    }

@@ -1,9 +1,9 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db.models import UniqueConstraint
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -19,7 +19,7 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
-    description = models.TextField()
+    description = models.TextField(blank=True)
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
         related_name='titles', blank=True, null=True

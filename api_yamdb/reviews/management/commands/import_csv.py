@@ -59,7 +59,6 @@ class Command(BaseCommand):
             csv_reader = csv.DictReader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
-                # id,username,email,role,bio,first_name,last_name
                 user = User(id=row['id'],
                             username=row['username'],
                             email=row['email'],

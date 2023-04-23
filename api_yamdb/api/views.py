@@ -1,14 +1,21 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, viewsets
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
 from .permissions import IsAuthorModeratorAdminOrReadOnly
-from reviews.models import (Category, Comment, Genre, GenreTitle,
-                            Review, Title, User)
-from .serializers import (CategorySerialiser, CommentSerializer,
-                          GenreSerialiser, GenreTitleSerialiser,
-                          ReviewSerializer, TitleSerialiser)
+from reviews.models import (Category,
+                            Comment,
+                            Genre,
+                            GenreTitle,
+                            Review,
+                            Title,
+                            User)
+from api.serializers import (CategorySerialiser,
+                             CommentSerializer,
+                             GenreSerialiser,
+                             ReviewSerializer,
+                             TitleSerialiser,
+                             UserSignupSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -49,7 +56,8 @@ class CategoryViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
     search_fields = ('name',)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
+                   mixins.ListModelMixin, viewsets.GenericViewSet):
     # get post del
     queryset = Genre.objects.all()
     serializer_class = GenreSerialiser
@@ -63,3 +71,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerialiser
     permission_classes = (IsAuthenticatedOrReadOnly,)
+
+
+class SignupViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSignupSerializer
+    permission_classes = (AllowAny,)
+
+
+class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    ...
