@@ -1,6 +1,8 @@
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, status, viewsets, views
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
 from .permissions import IsAuthorModeratorAdminOrReadOnly
 from reviews.models import (Category,
@@ -15,7 +17,8 @@ from api.serializers import (CategorySerialiser,
                              GenreSerialiser,
                              ReviewSerializer,
                              TitleSerialiser,
-                             UserSignupSerializer)
+                             UserSignupSerializer,
+                             UserTokenSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -80,4 +83,47 @@ class SignupViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    ...
+    queryset = User.objects.all()
+    serializer_class = UserTokenSerializer
+    permission_classes = (AllowAny,)
+
+
+class SignupView(views.APIView):
+
+    serializer_class = UserSignupSerializer
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        response = {}
+        if 'email' not in request.data:
+            response['email'] = ['Обязательное поле.']
+        if 'username' not in request.data:
+            response['username'] = ['Обязательное поле.']
+        if len(response) > 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=request.data)
+        valid = serializer.is_valid(raise_exception=True)
+        if valid:
+            email = serializer.validated_data['email']
+            username = serializer.validated_data['username']
+            serializer.save()
+            user = User.objects.get(email=email, username=username)
+            send_mail('Авторизация в YaMDB',
+                      f'''
+                      Уважаемый {user.username}!
+                      Вы успешно прошли регистрацию на сервисе YaMDB.
+                      Высылаем вам код активаци для получения токена.
+                      Код активации: {user.password}
+                      ''',
+                      'admin@yamdb',
+                      (user.email,),
+                      fail_silently=False,)
+
+            status_code = status.HTTP_200_OK
+            response = {
+                'email': serializer.data['email'],
+                'username': serializer.data['username'],
+            }
+
+            return Response(response, status=status_code)
