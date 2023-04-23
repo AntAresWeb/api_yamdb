@@ -1,3 +1,5 @@
+from django.contrib.auth.models import AbstractUser
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -21,16 +23,22 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    def save(self, *args, **kwargs):
+        if self.role == self.USER or self.role == self.MODERATOR:
+            self.is_staff = False
+        if self.role == self.ADMIN or self.is_superuser:
+            self.is_staff = True
+        super().save(*args, **kwargs)
+
     class Meta:
-        verbose_name = 'Роль пользователя'
-        verbose_name_plural = 'Роль пользователей'
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
         ordering = ('-id',)
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
-
+        return self.role == self.MODERATOR
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role == self.ADMIN

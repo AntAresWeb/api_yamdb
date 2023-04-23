@@ -26,18 +26,15 @@ class TitleSerialiser(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     genre = GenreSerialiser(read_only=True, many=True)
     category = CategorySerialiser(read_only=True)
-    
+
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'rating', 'description',
+                  'genre', 'category')
 
     def get_rating(self, obj):
         rating = obj.reviews.aggregate(Avg('score', default=0))
-<<<<<<< HEAD
-        return int(rating.get('score__avg'))
-=======
         return rating.get('score__avg')
->>>>>>> origin/develop
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -73,3 +70,14 @@ class ReviewSerializer(serializers.ModelSerializer):
                     'Вы уже оставили отзыв на это произведение'
                 )
         return data
+
+
+class UserSignupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'username')
+
+    extra_kwargs = {
+        'email': {'required': True, 'allow_blank': False},
+        'username': {'required': True, 'allow_blank': False},
+    }

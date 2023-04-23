@@ -1,9 +1,9 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db.models import UniqueConstraint
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-User = settings.AUTH_USER_MODEL
+User = get_user_model()
 
 
 class Category(models.Model):
