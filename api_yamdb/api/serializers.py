@@ -72,12 +72,52 @@ class ReviewSerializer(serializers.ModelSerializer):
         return data
 
 
-class UserSignupSerializer(serializers.ModelSerializer):
+class UserSignupSerializer(serializers.Serializer):
     class Meta:
         model = User
         fields = ('email', 'username')
 
-    extra_kwargs = {
-        'email': {'required': True, 'allow_blank': False},
-        'username': {'required': True, 'allow_blank': False},
-    }
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError('Значение не может быть me.')
+        return value
+
+    def validate(self, data):
+        email = data.get('email', None)
+        username = data.get('username', None)
+        print('---->')
+        return data
+
+    def create(self, validated_data):
+        auth_user = User.objects.create_user(**validated_data)
+        
+        return auth_user
+
+
+class UserTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+    def validate(self, data):
+        username = data['username']
+        confirmation_code = data['confirmation_code']
+        user = User.objects.get(username=username)
+
+        try:
+            refresh = RefreshToken.for_user(user)
+            refresh_token = str(refresh)
+            access_token = str(refresh.access_token)
+
+            update_last_login(None, user)
+
+            validation = {
+                'access': access_token,
+                'refresh': refresh_token,
+                'email': user.email,
+                'role': user.role,
+            }
+
+            return validation
+        except AuthUser.DoesNotExist:
+            raise serializers.ValidationError("Invalid login credentials")
