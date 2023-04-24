@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import (Category, Comment, Genre,
-                            Review, Title)
+                            Review, Title, User)
 from api.utils import name_is_valid
 
 
@@ -69,6 +69,13 @@ class ReviewSerializer(serializers.ModelSerializer):
                     'Вы уже оставили отзыв на это произведение'
                 )
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
 
 
 class UserSignupSerializer(serializers.Serializer):
