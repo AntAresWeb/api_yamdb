@@ -17,17 +17,24 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256)
-    year = models.IntegerField()
-    description = models.TextField(blank=True)
-    category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL,
-        related_name='titles', blank=True, null=True
-    )
+    name = models.CharField(max_length=256,
+                            verbose_name='Название произведения')
+    year = models.IntegerField(verbose_name='Год выпуска произведения')
+    description = models.TextField(blank=True,
+                                   verbose_name='Описание произведения')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
+                                 related_name='titles', blank=True, null=True,
+                                 verbose_name='Категория произведения')
+    genre = models.ManyToManyField(Genre, blank=True, related_name="titles",
+                                   verbose_name='Жанр произведения')
 
     class Meta:
+        ordering = ('-year',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        self.name
 
 
 class GenreTitle(models.Model):
