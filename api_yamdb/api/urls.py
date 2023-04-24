@@ -17,4 +17,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/signup/', views.AuthSignupView.as_view(), name='signup'),
     path('auth/token/', views.AuthTokenView.as_view(), name='token'),
+    path('drf-auth/', include('rest_framework.urls')),
 ]
