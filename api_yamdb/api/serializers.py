@@ -10,16 +10,14 @@ class CategorySerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('id', 'name', 'slug')
-        read_only_fields = ('id',)
+        exclude = ('id',)
 
 
 class GenreSerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('id', 'name', 'slug')
-        read_only_fields = ('id',)
+        exclude = ('id',)
 
 
 class TitleSerialiser(serializers.ModelSerializer):
