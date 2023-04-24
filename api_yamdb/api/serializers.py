@@ -2,8 +2,9 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import (Category, Comment, Genre, GenreTitle,
-                            Review, Title, User)
+from reviews.models import (Category, Comment, Genre,
+                            Review, Title)
+from api.utils import name_is_valid
 
 
 class CategorySerialiser(serializers.ModelSerializer):
@@ -70,12 +71,25 @@ class ReviewSerializer(serializers.ModelSerializer):
         return data
 
 
-class UserSignupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'username')
+class UserSignupSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=254, allow_blank=False)
+    username = serializers.CharField(max_length=150, allow_blank=False)
 
-    extra_kwargs = {
-        'email': {'required': True, 'allow_blank': False},
-        'username': {'required': True, 'allow_blank': False},
-    }
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError('Значение не может быть me.')
+        if not name_is_valid(value):
+            raise serializers.ValidationError('Содержит недопустимые символы.')
+        return value
+
+
+class UserTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150, allow_blank=False)
+    confirmation_code = serializers.CharField(allow_blank=False)
+
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError('Значение не может быть me.')
+        if not name_is_valid(value):
+            raise serializers.ValidationError('Содержит недопустимые символы.')
+        return value

@@ -12,10 +12,10 @@ router.register(r'titles/(?P<title_id>\d+)/reviews',
                 views.ReviewViewSet, basename='review')
 router.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)'
                 '/comments', views.CommentViewSet, basename='comment')
-router.register('signup/', views.SignupViewSet, basename='signup')
-router.register('token/', views.TokenViewSet, basename='token')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('auth/signup/', views.AuthSignupView.as_view(), name='signup'),
+    path('auth/token/', views.AuthTokenView.as_view(), name='token'),
     path('drf-auth/', include('rest_framework.urls')),
 ]
