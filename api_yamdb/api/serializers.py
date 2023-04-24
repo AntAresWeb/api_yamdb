@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from reviews.models import (Category, Comment, Genre, GenreTitle,
                             Review, Title, User)
+from api.utils import name_is_valid
 
 
 class CategorySerialiser(serializers.ModelSerializer):
@@ -73,51 +74,24 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class UserSignupSerializer(serializers.Serializer):
-    class Meta:
-        model = User
-        fields = ('email', 'username')
+    email = serializers.EmailField(max_length=254, allow_blank=False)
+    username = serializers.CharField(max_length=150, allow_blank=False)
 
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError('Значение не может быть me.')
+        if not name_is_valid(value):
+            raise serializers.ValidationError('Содержит недопустимые символы.')
         return value
 
-    def validate(self, data):
-        email = data.get('email', None)
-        username = data.get('username', None)
-        print('---->')
-        return data
 
-    def create(self, validated_data):
-        auth_user = User.objects.create_user(**validated_data)
-        
-        return auth_user
+class UserTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150, allow_blank=False)
+    confirmation_code = serializers.CharField(allow_blank=False)
 
-
-class UserTokenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
-
-    def validate(self, data):
-        username = data['username']
-        confirmation_code = data['confirmation_code']
-        user = User.objects.get(username=username)
-
-        try:
-            refresh = RefreshToken.for_user(user)
-            refresh_token = str(refresh)
-            access_token = str(refresh.access_token)
-
-            update_last_login(None, user)
-
-            validation = {
-                'access': access_token,
-                'refresh': refresh_token,
-                'email': user.email,
-                'role': user.role,
-            }
-
-            return validation
-        except AuthUser.DoesNotExist:
-            raise serializers.ValidationError("Invalid login credentials")
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError('Значение не может быть me.')
+        if not name_is_valid(value):
+            raise serializers.ValidationError('Содержит недопустимые символы.')
+        return value

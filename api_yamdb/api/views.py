@@ -1,8 +1,10 @@
+import uuid
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, status, viewsets, views
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .permissions import IsAuthorModeratorAdminOrReadOnly
 from reviews.models import (Category,
@@ -76,20 +78,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
-class SignupViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSignupSerializer
-    permission_classes = (AllowAny,)
-
-
-class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserTokenSerializer
-    permission_classes = (AllowAny,)
-
-
-class SignupView(views.APIView):
-
+class AuthSignupView(views.APIView):
     serializer_class = UserSignupSerializer
     permission_classes = (AllowAny, )
 
@@ -107,14 +96,20 @@ class SignupView(views.APIView):
         if valid:
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
-            serializer.save()
-            user = User.objects.get(email=email, username=username)
+            
+            user, created = User.objects.get_or_create(
+                username=username, email=email)
+            if not created:
+                
+
+            user.confirmation_code = str(uuid.uuid4())
+            user.save()
             send_mail('Авторизация в YaMDB',
                       f'''
                       Уважаемый {user.username}!
                       Вы успешно прошли регистрацию на сервисе YaMDB.
-                      Высылаем вам код активаци для получения токена.
-                      Код активации: {user.password}
+                      Высылаем вам код активаци для получения токена:
+                      {user.confirmation_code}
                       ''',
                       'admin@yamdb',
                       (user.email,),
@@ -124,6 +119,38 @@ class SignupView(views.APIView):
             response = {
                 'email': serializer.data['email'],
                 'username': serializer.data['username'],
+            }
+
+            return Response(response, status=status_code)
+
+
+class AuthTokenView(views.APIView):
+    serializer_class = UserTokenSerializer
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        response = {}
+        if 'username' not in request.data:
+            response['username'] = ['Обязательное поле.']
+        if 'confirmation_code' not in request.data:
+            response['confirmation_code'] = ['Обязательное поле.']
+        if len(response) > 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=request.data)
+        valid = serializer.is_valid(raise_exception=True)
+        if valid:
+            username = serializer.validated_data['username']
+            confirmation_code = serializer.validated_data['confirmation_code']
+            user = get_object_or_404(User, username=username)
+            if confirmation_code != user.confirmation_code:
+                response['confirmation_code'] = ['Неверный код подтверждения.']
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            refresh = RefreshToken.for_user(user)
+            token = str(refresh.access_token)
+            status_code = status.HTTP_200_OK
+            response = {
+                'token': token
             }
 
             return Response(response, status=status_code)
