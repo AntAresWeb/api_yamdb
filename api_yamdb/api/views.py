@@ -10,7 +10,6 @@ from .permissions import IsAuthorModeratorAdminOrReadOnly
 from reviews.models import (Category,
                             Comment,
                             Genre,
-                            GenreTitle,
                             Review,
                             Title,
                             User)
@@ -53,7 +52,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class CategoryViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
                       mixins.ListModelMixin, viewsets.GenericViewSet):
-    # get post del
     queryset = Category.objects.all()
     serializer_class = CategorySerialiser
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -96,12 +94,14 @@ class AuthSignupView(views.APIView):
         if valid:
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
-            
-            user, created = User.objects.get_or_create(
-                username=username, email=email)
-            if not created:
-                
-
+            try:
+                user = get_object_or_404(User, username=username)
+                if email != user.email:
+                    response['email'] = ['Не совпадает с регистрационным.']
+                    return Response(response,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            except User.DoesNotExist:
+                user = User.objects.create(username=username, email=email)
             user.confirmation_code = str(uuid.uuid4())
             user.save()
             send_mail('Авторизация в YaMDB',
