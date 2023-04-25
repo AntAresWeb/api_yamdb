@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import (Category, Comment, Genre,
-                            Review, Title)
+                            Review, Title, User)
 from api.utils import name_is_valid
 
 
@@ -54,8 +54,8 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date',)
         model = Comment
+        fields = ('id', 'text', 'author', 'pub_date',)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -65,8 +65,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date',)
         model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
 
     def validate(self, data):
         title_id = self.context['view'].kwargs.get('title_id')
@@ -80,6 +80,30 @@ class ReviewSerializer(serializers.ModelSerializer):
                     'Вы уже оставили отзыв на это произведение'
                 )
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+
+
+class UserMeSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=150, allow_blank=False)
+    email = serializers.EmailField(max_length=254, allow_blank=False)
+    first_name = serializers.CharField(max_length=150, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        read_only_fields = ('role',)
+
+    def validate_username(self, value):
+        if not name_is_valid(value):
+            raise serializers.ValidationError('Содержит недопустимые символы.')
+        return value
 
 
 class UserSignupSerializer(serializers.Serializer):

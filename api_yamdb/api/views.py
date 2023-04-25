@@ -2,15 +2,19 @@ from django.db.models import Avg
 import uuid
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, mixins, status, viewsets, views
+from rest_framework import filters, mixins, status, viewsets, views, generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (AllowAny,
+                                        IsAdminUser,
+                                        IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .filters import TitleFilter
-from .permissions import IsAuthorModeratorAdminOrReadOnly, IsAdminOrReadOnly
+from api.filters import TitleFilter
+from api.permissions import IsAuthorModeratorAdminOrReadOnly, IsAdminOrReadOnly
 from reviews.models import (Category,
                             Comment,
                             Genre,
@@ -22,9 +26,11 @@ from api.serializers import (CategorySerialiser,
                              GenreSerialiser,
                              ReviewSerializer,
                              TitleSerializer,
-                             UserSignupSerializer, TitleCreateSerializer)
-
-
+                             TitleCreateSerializer,
+                             UserSerializer,
+                             UserMeSerializer,
+                             UserSignupSerializer,
+                             UserTokenSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -87,6 +93,31 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class UserMeDetailUpdateAPIView(views.APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserMeSerializer
+
+    def get(self, request):
+        instance = get_object_or_404(User, pk=request.user.id)
+        serializer = self.serializer_class(instance=instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        instance = get_object_or_404(User, pk=request.user.id)
+        serializer = self.serializer_class(
+            instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.update(instance, serializer.validated_data)
+            return Response(serializer.validated_data, status=200)
+        return Response(serializer.errors, status=400)
+
+
 class AuthSignupView(views.APIView):
     serializer_class = UserSignupSerializer
     permission_classes = (AllowAny, )
@@ -106,13 +137,18 @@ class AuthSignupView(views.APIView):
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
             try:
-                user = get_object_or_404(User, username=username)
+                user = User.objects.get(username=username)
                 if email != user.email:
                     response['email'] = ['Не совпадает с регистрационным.']
                     return Response(response,
                                     status=status.HTTP_400_BAD_REQUEST)
             except User.DoesNotExist:
-                user = User.objects.create(username=username, email=email)
+                if User.objects.filter(email=email).exists():
+                    response['email'] = ['Такой e-mail уже занят.']
+                    return Response(response,
+                                    status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    user = User.objects.create(username=username, email=email)
             user.confirmation_code = str(uuid.uuid4())
             user.save()
             send_mail('Авторизация в YaMDB',
@@ -127,12 +163,7 @@ class AuthSignupView(views.APIView):
                       fail_silently=False,)
 
             status_code = status.HTTP_200_OK
-            response = {
-                'email': serializer.data['email'],
-                'username': serializer.data['username'],
-            }
-
-            return Response(response, status=status_code)
+            return Response(serializer.validated_data, status=status_code)
 
 
 class AuthTokenView(views.APIView):
