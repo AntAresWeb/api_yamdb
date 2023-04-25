@@ -137,13 +137,18 @@ class AuthSignupView(views.APIView):
             email = serializer.validated_data['email']
             username = serializer.validated_data['username']
             try:
-                user = get_object_or_404(User, username=username)
+                user = User.objects.get(username=username)
                 if email != user.email:
                     response['email'] = ['Не совпадает с регистрационным.']
                     return Response(response,
                                     status=status.HTTP_400_BAD_REQUEST)
             except User.DoesNotExist:
-                user = User.objects.create(username=username, email=email)
+                if User.objects.filter(email=email).exists():
+                    response['email'] = ['Такой e-mail уже занят.']
+                    return Response(response,
+                                    status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    user = User.objects.create(username=username, email=email)
             user.confirmation_code = str(uuid.uuid4())
             user.save()
             send_mail('Авторизация в YaMDB',
@@ -158,12 +163,7 @@ class AuthSignupView(views.APIView):
                       fail_silently=False,)
 
             status_code = status.HTTP_200_OK
-            response = {
-                'email': serializer.data['email'],
-                'username': serializer.data['username'],
-            }
-
-            return Response(response, status=status_code)
+            return Response(serializer.validated_data, status=status_code)
 
 
 class AuthTokenView(views.APIView):

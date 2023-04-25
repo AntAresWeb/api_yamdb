@@ -101,23 +101,9 @@ class UserMeSerializer(serializers.ModelSerializer):
         read_only_fields = ('role',)
 
     def validate_username(self, value):
-        print('---> validate_username')
         if not name_is_valid(value):
             raise serializers.ValidationError('Содержит недопустимые символы.')
         return value
-
-'''   def partial_update(self, instance, validated_data):
-        print('instance --> ', instance)
-        instance.username = validated_data.get("username", instance.title)
-        instance.email = validated_data.get("email", instance.email)
-        instance.first_name = validated_data.get("first_name",
-                                                 instance.first_name)
-        instance.last_name = validated_data.get("last_name",
-                                                instance.last_name)
-        instance.bio = validated_data.get("bio", instance.bio)
-        instance.save()
-        return instance
-'''
 
 
 class UserSignupSerializer(serializers.Serializer):
