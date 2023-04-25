@@ -68,6 +68,7 @@ class CategoryViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
@@ -78,6 +79,7 @@ class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -97,11 +99,13 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
+    lookup_field = 'username'
 
 
 class UserMeDetailUpdateAPIView(views.APIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserMeSerializer
+    lookup_field = 'username'
 
     def get(self, request):
         instance = get_object_or_404(User, pk=request.user.id)
