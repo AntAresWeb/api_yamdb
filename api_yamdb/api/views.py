@@ -65,7 +65,7 @@ class CategoryViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
                       mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerialiser
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -75,7 +75,7 @@ class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
     # get post del
     queryset = Genre.objects.all()
     serializer_class = GenreSerialiser
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
