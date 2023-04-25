@@ -1,15 +1,19 @@
 from django.db.models import Avg
+import uuid
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from rest_framework import filters, mixins, status, viewsets, views
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .filters import TitleFilter
 from .permissions import IsAuthorModeratorAdminOrReadOnly, IsAdminOrReadOnly
 from reviews.models import (Category,
                             Comment,
                             Genre,
-                            GenreTitle,
                             Review,
                             Title,
                             User)
@@ -19,6 +23,8 @@ from api.serializers import (CategorySerialiser,
                              ReviewSerializer,
                              TitleSerializer,
                              UserSignupSerializer, TitleCreateSerializer)
+
+
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -51,7 +57,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class CategoryViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
                       mixins.ListModelMixin, viewsets.GenericViewSet):
-    # get post del
     queryset = Category.objects.all()
     serializer_class = CategorySerialiser
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -82,11 +87,81 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer
 
 
-class SignupViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    queryset = User.objects.all()
+class AuthSignupView(views.APIView):
     serializer_class = UserSignupSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        response = {}
+        if 'email' not in request.data:
+            response['email'] = ['Обязательное поле.']
+        if 'username' not in request.data:
+            response['username'] = ['Обязательное поле.']
+        if len(response) > 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=request.data)
+        valid = serializer.is_valid(raise_exception=True)
+        if valid:
+            email = serializer.validated_data['email']
+            username = serializer.validated_data['username']
+            try:
+                user = get_object_or_404(User, username=username)
+                if email != user.email:
+                    response['email'] = ['Не совпадает с регистрационным.']
+                    return Response(response,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            except User.DoesNotExist:
+                user = User.objects.create(username=username, email=email)
+            user.confirmation_code = str(uuid.uuid4())
+            user.save()
+            send_mail('Авторизация в YaMDB',
+                      f'''
+                      Уважаемый {user.username}!
+                      Вы успешно прошли регистрацию на сервисе YaMDB.
+                      Высылаем вам код активаци для получения токена:
+                      {user.confirmation_code}
+                      ''',
+                      'admin@yamdb',
+                      (user.email,),
+                      fail_silently=False,)
+
+            status_code = status.HTTP_200_OK
+            response = {
+                'email': serializer.data['email'],
+                'username': serializer.data['username'],
+            }
+
+            return Response(response, status=status_code)
 
 
-class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    ...
+class AuthTokenView(views.APIView):
+    serializer_class = UserTokenSerializer
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        response = {}
+        if 'username' not in request.data:
+            response['username'] = ['Обязательное поле.']
+        if 'confirmation_code' not in request.data:
+            response['confirmation_code'] = ['Обязательное поле.']
+        if len(response) > 0:
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=request.data)
+        valid = serializer.is_valid(raise_exception=True)
+        if valid:
+            username = serializer.validated_data['username']
+            confirmation_code = serializer.validated_data['confirmation_code']
+            user = get_object_or_404(User, username=username)
+            if confirmation_code != user.confirmation_code:
+                response['confirmation_code'] = ['Неверный код подтверждения.']
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            refresh = RefreshToken.for_user(user)
+            token = str(refresh.access_token)
+            status_code = status.HTTP_200_OK
+            response = {
+                'token': token
+            }
+
+            return Response(response, status=status_code)

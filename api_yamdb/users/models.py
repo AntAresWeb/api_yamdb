@@ -1,7 +1,5 @@
-from django.contrib.auth.models import AbstractUser
-
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
@@ -19,6 +17,8 @@ class User(AbstractUser):
     bio = models.TextField(verbose_name='Биография', blank=True)
     confirmation_code = models.CharField(verbose_name='Код подтверждения',
                                          max_length=40, null=True, blank=True)
+
+    objects = UserManager()
 
     def __str__(self):
         return self.username
