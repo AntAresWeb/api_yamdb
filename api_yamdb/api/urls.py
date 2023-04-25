@@ -12,11 +12,12 @@ router.register(r'titles/(?P<title_id>\d+)/reviews',
                 views.ReviewViewSet, basename='review')
 router.register(r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)'
                 '/comments', views.CommentViewSet, basename='comment')
-router.register('users', views.UserViewSet, basename='title')
+router.register('users', views.UserViewSet, basename='user')
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('auth/signup/', views.AuthSignupView.as_view(), name='signup'),
     path('auth/token/', views.AuthTokenView.as_view(), name='token'),
+    path('users/me/', views.UserMeDetailUpdateAPIView.as_view(), name='userme'),
     path('drf-auth/', include('rest_framework.urls')),
+    path('', include(router.urls)),
 ]

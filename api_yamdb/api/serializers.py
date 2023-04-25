@@ -54,8 +54,8 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date',)
         model = Comment
+        fields = ('id', 'text', 'author', 'pub_date',)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -65,8 +65,8 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date',)
         model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
 
     def validate(self, data):
         title_id = self.context['view'].kwargs.get('title_id')
@@ -87,6 +87,37 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+
+
+class UserMeSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=150, allow_blank=False)
+    email = serializers.EmailField(max_length=254, allow_blank=False)
+    first_name = serializers.CharField(max_length=150, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        read_only_fields = ('role',)
+
+    def validate_username(self, value):
+        print('---> validate_username')
+        if not name_is_valid(value):
+            raise serializers.ValidationError('Содержит недопустимые символы.')
+        return value
+
+'''   def partial_update(self, instance, validated_data):
+        print('instance --> ', instance)
+        instance.username = validated_data.get("username", instance.title)
+        instance.email = validated_data.get("email", instance.email)
+        instance.first_name = validated_data.get("first_name",
+                                                 instance.first_name)
+        instance.last_name = validated_data.get("last_name",
+                                                instance.last_name)
+        instance.bio = validated_data.get("bio", instance.bio)
+        instance.save()
+        return instance
+'''
 
 
 class UserSignupSerializer(serializers.Serializer):

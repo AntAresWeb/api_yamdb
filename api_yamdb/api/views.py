@@ -2,15 +2,19 @@ from django.db.models import Avg
 import uuid
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, mixins, status, viewsets, views
+from rest_framework import filters, mixins, status, viewsets, views, generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (AllowAny,
+                                        IsAdminUser,
+                                        IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .filters import TitleFilter
-from .permissions import IsAuthorModeratorAdminOrReadOnly, IsAdminOrReadOnly
+from api.filters import TitleFilter
+from api.permissions import IsAuthorModeratorAdminOrReadOnly, IsAdminOrReadOnly
 from reviews.models import (Category,
                             Comment,
                             Genre,
@@ -21,7 +25,10 @@ from api.serializers import (CategorySerialiser,
                              CommentSerializer,
                              GenreSerialiser,
                              ReviewSerializer,
-                             TitleSerialiser,
+                             TitleSerializer,
+                             TitleCreateSerializer,
+                             UserSerializer,
+                             UserMeSerializer,
                              UserSignupSerializer,
                              UserTokenSerializer)
 
@@ -75,11 +82,40 @@ class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
 
 class TitleViewSet(viewsets.ModelViewSet):
     # get post patch del
-    queryset = Title.objects.all()
-    serializer_class = TitleSerialiser
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly)
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).all()
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH',):
+            return TitleCreateSerializer
+        return TitleSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class UserMeDetailUpdateAPIView(views.APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserMeSerializer
+
+    def get(self, request):
+        instance = get_object_or_404(User, pk=request.user.id)
+        serializer = self.serializer_class(instance=instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        instance = get_object_or_404(User, pk=request.user.id)
+        serializer = self.serializer_class(
+            instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.update(instance, serializer.validated_data)
+            return Response(serializer.validated_data, status=200)
+        return Response(serializer.errors, status=400)
 
 
 class AuthSignupView(views.APIView):
