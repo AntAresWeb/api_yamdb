@@ -1,6 +1,7 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets, permissions
+from rest_framework import filters, mixins, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
 from .filters import TitleFilter
@@ -16,8 +17,8 @@ from api.serializers import (CategorySerialiser,
                              CommentSerializer,
                              GenreSerialiser,
                              ReviewSerializer,
-                             TitleSerialiser,
-                             UserSignupSerializer)
+                             TitleSerializer,
+                             UserSignupSerializer, TitleCreateSerializer)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -70,11 +71,15 @@ class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
 
 class TitleViewSet(viewsets.ModelViewSet):
     # get post patch del
-    queryset = Title.objects.all()
-    serializer_class = TitleSerialiser
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAdminOrReadOnly)
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).all()
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH',):
+            return TitleCreateSerializer
+        return TitleSerializer
 
 
 class SignupViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):

@@ -20,19 +20,30 @@ class GenreSerialiser(serializers.ModelSerializer):
         exclude = ('id',)
 
 
-class TitleSerialiser(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
-    genre = GenreSerialiser(read_only=True, many=True)
-    category = CategorySerialiser(read_only=True)
+class TitleCreateSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description',
-                  'genre', 'category')
+        fields = '__all__'
 
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score', default=0))
-        return rating.get('score__avg')
+
+class TitleSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(read_only=True)
+    genre = GenreSerialiser(many=True)
+    category = CategorySerialiser()
+
+    class Meta:
+        model = Title
+        fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
