@@ -94,9 +94,11 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    '''Контроллер запросов api/v1/users/'''
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
+    lookup_field = 'username'
 
 
 class UserMeDetailUpdateAPIView(views.APIView):

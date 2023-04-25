@@ -83,6 +83,12 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    '''Сериализер api/v1/users/'''
+
+    username = serializers.CharField(max_length=150, allow_blank=False)
+    email = serializers.EmailField(max_length=254, allow_blank=False)
+    first_name = serializers.CharField(max_length=150, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, allow_blank=True)
 
     class Meta:
         model = User
