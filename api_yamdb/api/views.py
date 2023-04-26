@@ -1,36 +1,22 @@
-from django.db.models import Avg
 import uuid
-from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
-from rest_framework import filters, mixins, status, viewsets, views, generics
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets
-from rest_framework.permissions import (AllowAny,
-                                        IsAdminUser,
-                                        IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
-
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.filters import TitleFilter
-from api.permissions import IsAuthorModeratorAdminOrReadOnly, IsAdminOrReadOnly
-from reviews.models import (Category,
-                            Comment,
-                            Genre,
-                            Review,
-                            Title,
-                            User)
-from api.serializers import (CategorySerialiser,
-                             CommentSerializer,
-                             GenreSerialiser,
-                             ReviewSerializer,
-                             TitleSerializer,
-                             TitleCreateSerializer,
-                             UserSerializer,
-                             UserMeSerializer,
-                             UserSignupSerializer,
-                             UserTokenSerializer)
+from api.permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
+from api.serializers import (CategorySerialiser, CommentSerializer,
+                             GenreSerialiser, ReviewSerializer,
+                             TitleCreateSerializer, TitleSerializer,
+                             UserMeSerializer, UserSerializer,
+                             UserSignupSerializer, UserTokenSerializer)
+from django.core.mail import send_mail
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, views, viewsets
+from rest_framework.permissions import (AllowAny, IsAdminUser,
+                                        IsAuthenticated)
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from reviews.models import Category, Genre, Review, Title, User
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

@@ -1,10 +1,7 @@
-from django.db.models import Avg
+from api.utils import name_is_valid
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
-from reviews.models import (Category, Comment, Genre,
-                            Review, Title, User)
-from api.utils import name_is_valid
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class CategorySerialiser(serializers.ModelSerializer):
