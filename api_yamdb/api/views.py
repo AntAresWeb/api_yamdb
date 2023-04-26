@@ -84,7 +84,8 @@ class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
 
 class TitleViewSet(viewsets.ModelViewSet):
     # get post patch del
-    queryset = Title.objects.annotate(rating=Avg('reviews__score')).all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')
+                                      ).all().order_by('-year',)
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
