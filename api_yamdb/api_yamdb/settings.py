@@ -119,8 +119,8 @@ SIMPLE_JWT = {
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'USER_ID_FIELD': 'id',    
-    'USER_ID_CLAIM': 'user_id',    
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
