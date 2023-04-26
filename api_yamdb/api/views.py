@@ -104,6 +104,7 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
 
 class UserMeDetailUpdateAPIView(views.APIView):
@@ -132,10 +133,9 @@ class AuthSignupView(views.APIView):
 
     def post(self, request):
         response = {}
-        if 'email' not in request.data:
-            response['email'] = ['Обязательное поле.']
-        if 'username' not in request.data:
-            response['username'] = ['Обязательное поле.']
+        for field in ('username', 'email'):
+            if field not in request.data:
+                response[field] = ['Обязательное поле.']
         if len(response) > 0:
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
