@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
@@ -9,42 +11,79 @@ class CategorySerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        exclude = ('id',)
         lookup_field = 'slug'
+        fields = ('name', 'slug',)
+        extra_kwargs = {
+            'name': {'required': True, 'max_length': 256},
+            'slug': {'required': True, 'max_length': 50},
+        }
 
 
 class GenreSerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        exclude = ('id',)
         lookup_field = 'slug'
+        fields = ('name', 'slug',)
+        extra_kwargs = {
+            'name': {'required': True, 'max_length': 256},
+            'slug': {'required': True, 'max_length': 50},
+        }
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
-        slug_field='slug'
+        slug_field='slug',
+        required=True
     )
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
-        many=True
+        many=True,
+        required=True
+    )
+    year = serializers.IntegerField(
+        max_value=datetime.now().year,
+        required=True
     )
 
     class Meta:
         model = Title
-        fields = ('')
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        extra_kwargs = {
+            'id': {'required': False, 'read_only': True},
+            'name': {'required': True, 'max_length': 256},
+            'rating': {'required': False, 'read_only': True, 'default': None},
+            'description': {'allow_blank': True}
+        }
 
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True)
-    genre = GenreSerialiser(many=True)
-    category = CategorySerialiser()
+    genre = GenreSerialiser(many=True, read_only=True)
+    genre.fields = ('slug',)
+    category = CategorySerialiser(read_only=True)
+    year = serializers.IntegerField(
+        max_value=datetime.now().year,
+        required=True
+    )
+
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        extra_kwargs = {
+            'id': {'required': False, 'read_only': True},
+            'name': {'required': True, 'max_length': 256},
+            'year': {'required': True},
+            'rating': {'required': False, 'read_only': True},
+            'description': {'allow_blank': True},
+            'genre': {'required': True},
+            'category': {'required': True}
+        }
 
 
 class CommentSerializer(serializers.ModelSerializer):

@@ -2,8 +2,8 @@ import csv
 
 from django.contrib.staticfiles import finders
 from django.core.management.base import BaseCommand
-from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
-                            Title, User)
+
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class Command(BaseCommand):
@@ -71,17 +71,15 @@ class Command(BaseCommand):
         self.stdout.write("Добавлено строк %s" % line_count)
 
         self.stdout.write('Импорт жанров произведений')
-        GenreTitle.objects.all().delete()
+        #GenreTitle.objects.all().delete()
         with open(finders.find('data/genre_title.csv')) as csv_file:
             csv_reader = csv.DictReader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
                 title = Title.objects.get(pk=row['title_id'])
                 genre = Genre.objects.get(pk=row['genre_id'])
-                genre_title = GenreTitle(id=row['id'],
-                                         title=title,
-                                         genre=genre)
-                genre_title.save()
+                title.genre.add(genre)
+                title.save()
                 line_count += 1
 
         self.stdout.write("Добавлено строк %s" % line_count)
