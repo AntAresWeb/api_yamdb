@@ -1,6 +1,7 @@
-from api.utils import name_is_valid
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+
+from api.utils import name_is_valid
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
@@ -33,7 +34,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('')
 
 
 class TitleSerializer(serializers.ModelSerializer):
