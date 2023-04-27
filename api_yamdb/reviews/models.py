@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
@@ -28,11 +27,17 @@ class Title(models.Model):
     year = models.IntegerField(verbose_name='Год выпуска произведения')
     description = models.TextField(blank=True,
                                    verbose_name='Описание произведения')
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
-                                 related_name='titles', blank=True, null=True,
-                                 verbose_name='Категория произведения')
-    genre = models.ManyToManyField(Genre, blank=True, related_name="titles",
-                                   verbose_name='Жанр произведения')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='titles', blank=True, null=True,
+        verbose_name='Категория произведения'
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        blank=True, related_name="titles",
+        verbose_name='Жанр произведения'
+    )
 
     class Meta:
         ordering = ('-year',)
@@ -43,13 +48,6 @@ class Title(models.Model):
         self.name
 
 
-class GenreTitle(models.Model):
-    title = models.ForeignKey(
-        Title, related_name='titles', on_delete=models.CASCADE)
-    genre = models.ForeignKey(
-        Genre, related_name='genres', on_delete=models.CASCADE)
-
-
 class Review(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews')
@@ -57,18 +55,18 @@ class Review(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
     score = models.IntegerField(default=1,
-                                validators=[MinValueValidator(1),
-                                            MaxValueValidator(10)])
+                                validators=(MinValueValidator(1),
+                                            MaxValueValidator(10)))
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
 
     class Meta:
-        ordering = ['-pub_date', ]
-        constraints = [
-            UniqueConstraint(
-                fields=['title', 'author'], name='unique_review'
-            )
-        ]
+        ordering = ('-pub_date',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=('title', 'author'), name='unique_review'
+            ),
+        )
 
     def __str__(self):
         return self.text
@@ -84,7 +82,7 @@ class Comment(models.Model):
         'Дата добавления', auto_now_add=True, db_index=True)
 
     class Meta:
-        ordering = ['-pub_date', ]
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.text
