@@ -31,13 +31,26 @@ class GenreSerialiser(serializers.ModelSerializer):
         }
 
 
-class TitleCreateSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
+class CategoryRelatedField(serializers.SlugRelatedField):
+
+    def to_representation(self, value):
+        return {"name": value.name, "slug": value.slug}
+
+
+class GenreRelatedField(serializers.SlugRelatedField):
+
+    def to_representation(self, value):
+        return {"name": value.name, "slug": value.slug}
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(read_only=True, default=None)
+    category = CategoryRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
         required=True
     )
-    genre = serializers.SlugRelatedField(
+    genre = GenreRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
@@ -55,34 +68,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'required': False, 'read_only': True},
             'name': {'required': True, 'max_length': 256},
-            'rating': {'required': False, 'read_only': True, 'default': None},
             'description': {'allow_blank': True}
-        }
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(read_only=True)
-    genre = GenreSerialiser(many=True, read_only=True)
-    genre.fields = ('slug',)
-    category = CategorySerialiser(read_only=True)
-    year = serializers.IntegerField(
-        max_value=datetime.now().year,
-        required=True
-    )
-
-
-    class Meta:
-        model = Title
-        fields = ('id', 'name', 'year', 'rating',
-                  'description', 'genre', 'category')
-        extra_kwargs = {
-            'id': {'required': False, 'read_only': True},
-            'name': {'required': True, 'max_length': 256},
-            'year': {'required': True},
-            'rating': {'required': False, 'read_only': True},
-            'description': {'allow_blank': True},
-            'genre': {'required': True},
-            'category': {'required': True}
         }
 
 

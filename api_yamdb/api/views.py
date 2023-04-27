@@ -13,7 +13,7 @@ from api.filters import TitleFilter
 from api.permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
 from api.serializers import (CategorySerialiser, CommentSerializer,
                              GenreSerialiser, ReviewSerializer,
-                             TitleCreateSerializer, TitleSerializer,
+                             TitleSerializer,
                              UserMeSerializer, UserSerializer,
                              UserSignupSerializer, UserTokenSerializer)
 from reviews.models import Category, Genre, Review, Title, User
@@ -68,16 +68,11 @@ class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')).all().order_by('-year',)
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-
-    def get_serializer_class(self):
-    #    if self.request.method in ('POST', 'PATCH',):
-    #        return TitleCreateSerializer
-        return TitleSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
