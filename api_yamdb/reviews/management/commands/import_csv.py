@@ -71,7 +71,6 @@ class Command(BaseCommand):
         self.stdout.write("Добавлено строк %s" % line_count)
 
         self.stdout.write('Импорт жанров произведений')
-        #GenreTitle.objects.all().delete()
         with open(finders.find('data/genre_title.csv')) as csv_file:
             csv_reader = csv.DictReader(csv_file, delimiter=',')
             line_count = 0
