@@ -14,7 +14,6 @@ class IsAuthorModeratorAdminOrReadOnly(permissions.BasePermission):
                 or request.user.is_admin)
 
 
-# создание прав доступа по ТЗ:
 class IsAuthorOrReadOnly(permissions.BasePermission):
     """Аутентифицированный пользователь (user) — может: читать всё; публиковать
     отзывы и ставить оценки произведениям (фильмам/книгам/песенкам);
@@ -53,11 +52,6 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     назначать роли пользователям."""
 
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return request.user.is_authenticated and request.user.role == 'admin'
-
-    def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
         return request.user.is_authenticated and request.user.role == 'admin'
