@@ -1,21 +1,21 @@
 import uuid
 
-from api.filters import TitleFilter
-from api.permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
-from api.serializers import (CategorySerialiser, CommentSerializer,
-                             GenreSerialiser, ReviewSerializer,
-                             TitleCreateSerializer, TitleSerializer,
-                             UserMeSerializer, UserSerializer,
-                             UserSignupSerializer, UserTokenSerializer)
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, views, viewsets
-from rest_framework.permissions import (AllowAny, IsAdminUser,
-                                        IsAuthenticated)
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from api.filters import TitleFilter
+from api.permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
+from api.serializers import (CategorySerialiser, CommentSerializer,
+                             GenreSerialiser, ReviewSerializer,
+                             TitleSerializer,
+                             UserMeSerializer, UserSerializer,
+                             UserSignupSerializer, UserTokenSerializer)
 from reviews.models import Category, Genre, Review, Title, User
 
 
@@ -59,7 +59,6 @@ class CategoryViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
 
 class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
                    mixins.ListModelMixin, viewsets.GenericViewSet):
-    # get post del
     queryset = Genre.objects.all()
     serializer_class = GenreSerialiser
     permission_classes = (IsAdminOrReadOnly,)
@@ -69,17 +68,12 @@ class GenreViewSet(mixins.DestroyModelMixin, mixins.CreateModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    # get post patch del
-    queryset = Title.objects.annotate(rating=Avg('reviews__score')
-                                      ).all().order_by('-year',)
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).all().order_by('-year',)
+    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-
-    def get_serializer_class(self):
-        if self.request.method in ('POST', 'PATCH',):
-            return TitleCreateSerializer
-        return TitleSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -109,8 +103,9 @@ class UserMeDetailUpdateAPIView(views.APIView):
             instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(instance, serializer.validated_data)
-            return Response(serializer.validated_data, status=200)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.validated_data,
+                            status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthSignupView(views.APIView):

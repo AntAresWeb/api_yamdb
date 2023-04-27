@@ -1,6 +1,9 @@
-from api.utils import name_is_valid
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+
+from api.utils import name_is_valid
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
@@ -8,42 +11,65 @@ class CategorySerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        exclude = ('id',)
         lookup_field = 'slug'
+        fields = ('name', 'slug',)
+        extra_kwargs = {
+            'name': {'required': True, 'max_length': 256},
+            'slug': {'required': True, 'max_length': 50},
+        }
 
 
 class GenreSerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        exclude = ('id',)
         lookup_field = 'slug'
+        fields = ('name', 'slug',)
+        extra_kwargs = {
+            'name': {'required': True, 'max_length': 256},
+            'slug': {'required': True, 'max_length': 50},
+        }
 
 
-class TitleCreateSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(),
-        slug_field='slug'
-    )
-    genre = serializers.SlugRelatedField(
-        queryset=Genre.objects.all(),
-        slug_field='slug',
-        many=True
-    )
+class CategoryRelatedField(serializers.SlugRelatedField):
 
-    class Meta:
-        model = Title
-        fields = '__all__'
+    def to_representation(self, value):
+        return {"name": value.name, "slug": value.slug}
+
+
+class GenreRelatedField(serializers.SlugRelatedField):
+
+    def to_representation(self, value):
+        return {"name": value.name, "slug": value.slug}
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(read_only=True)
-    genre = GenreSerialiser(many=True)
-    category = CategorySerialiser()
+    rating = serializers.IntegerField(read_only=True, default=None)
+    category = CategoryRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+        required=True
+    )
+    genre = GenreRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
+        required=True
+    )
+    year = serializers.IntegerField(
+        max_value=datetime.now().year,
+        required=True
+    )
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        extra_kwargs = {
+            'id': {'required': False, 'read_only': True},
+            'name': {'required': True, 'max_length': 256},
+            'description': {'allow_blank': True}
+        }
 
 
 class CommentSerializer(serializers.ModelSerializer):
