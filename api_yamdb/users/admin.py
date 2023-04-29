@@ -4,7 +4,6 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User
 
 
-# Register your models here.
 @admin.register(User)
 class RoleUserAdmin(UserAdmin):
     list_display = ('id', 'username', 'email', 'role', 'bio', 'first_name',
