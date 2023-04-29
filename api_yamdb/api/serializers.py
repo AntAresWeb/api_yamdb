@@ -13,10 +13,6 @@ class CategorySerialiser(serializers.ModelSerializer):
         model = Category
         lookup_field = 'slug'
         fields = ('name', 'slug',)
-        extra_kwargs = {
-            'name': {'required': True, 'max_length': 256},
-            'slug': {'required': True, 'max_length': 50},
-        }
 
 
 class GenreSerialiser(serializers.ModelSerializer):
@@ -25,19 +21,9 @@ class GenreSerialiser(serializers.ModelSerializer):
         model = Genre
         lookup_field = 'slug'
         fields = ('name', 'slug',)
-        extra_kwargs = {
-            'name': {'required': True, 'max_length': 256},
-            'slug': {'required': True, 'max_length': 50},
-        }
 
 
-class CategoryRelatedField(serializers.SlugRelatedField):
-
-    def to_representation(self, value):
-        return {"name": value.name, "slug": value.slug}
-
-
-class GenreRelatedField(serializers.SlugRelatedField):
+class NamedRelatedField(serializers.SlugRelatedField):
 
     def to_representation(self, value):
         return {"name": value.name, "slug": value.slug}
@@ -45,12 +31,12 @@ class GenreRelatedField(serializers.SlugRelatedField):
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(read_only=True, default=None)
-    category = CategoryRelatedField(
+    category = NamedRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
         required=True
     )
-    genre = GenreRelatedField(
+    genre = NamedRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
         many=True,
@@ -65,11 +51,6 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
-        extra_kwargs = {
-            'id': {'required': False, 'read_only': True},
-            'name': {'required': True, 'max_length': 256},
-            'description': {'allow_blank': True}
-        }
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -115,13 +96,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         lookup_field = 'username'
-        extra_kwargs = {
-            'username': {'required': True, 'max_length': 150},
-            'email': {'required': True, 'max_length': 254},
-            'first_name': {'allow_blank': True, 'max_length': 150},
-            'last_name': {'allow_blank': True, 'max_length': 150},
-            'role': {'default': 'user'}
-        }
         validators = [
             serializers.UniqueTogetherValidator(
                 queryset=model.objects.all(),
@@ -157,13 +131,6 @@ class UserMeSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         read_only_fields = ('role',)
-        extra_kwargs = {
-            'username': {'required': True, 'max_length': 150},
-            'email': {'required': True, 'max_length': 254},
-            'first_name': {'allow_blank': True, 'max_length': 150},
-            'last_name': {'allow_blank': True, 'max_length': 150},
-            'role': {'default': 'user'}
-        }
 
     def validate_username(self, value):
         if not name_is_valid(value):
